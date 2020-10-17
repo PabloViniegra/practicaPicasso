@@ -2,7 +2,7 @@
 
 ###**Pablo Viniegra Picazo**
 
-####Descripción del ejercicio
+####Descripción del ejercicio####
 
 Ninguna imagen se debe mostrar hasta que se pulse el botón DOWNLOAD, una vez pulsado las
 tres o más imagenes (el mínimo es de tres) de grupos musicales o cantantes escogidos por el alumno
@@ -16,7 +16,7 @@ El botón SAVE guardará la imagen que se muestre en ese momento.
 Esta práctica se entrega mediante un enlace al repositorio en un control de versiones que contiene la
 práctica, cualquier otra forma de entrega no será aceptada.
 
-####Para la realización del ejercicio se utilizará la librería Picasso
+####Para la realización del ejercicio se utilizará la librería Picasso####
 ~~~
 ''Picasso.get().load(URL).into(ImageView);''
 ~~~
