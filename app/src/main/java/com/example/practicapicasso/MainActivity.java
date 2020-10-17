@@ -7,6 +7,7 @@ import androidx.core.content.ContextCompat;
 import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -30,6 +31,7 @@ import java.net.URI;
 import java.security.Permission;
 import java.security.PermissionCollection;
 import java.security.Permissions;
+import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -37,8 +39,9 @@ public class MainActivity extends AppCompatActivity {
     Button btnDownload = null;
     Button btnSave = null;
     Button btnPermissions = null;
-    ImageView image = null;
-    final int  MY_PERMISSION_WRITE = 3;
+    static ImageView image = null;
+    final int TAG = 1;
+    final int MY_PERMISSION_WRITE = 3;
     final int MY_PERMISSION_INTERNET = 2;
     public final String MESSAGE_ERROR_IO = "Ha saltado una IOException";
     public final String INTERNET_ACCEPTED = "Los permisos de Internet han sido otorgados";
@@ -47,6 +50,10 @@ public class MainActivity extends AppCompatActivity {
     static String firstGroup = "https://lh3.googleusercontent.com/proxy/887bHSpuM52lTANHg5nYVN39BvLIOwgDQcNiA1SR8DF-NMChWA3mM8wDiUs-b411j2opT989rfX_wyC9FWEhdO6ylrD8-L2ZZHpzT_T6aa0XLN9eyvZQTtRBEA";
     static String secondGroup = "https://images-na.ssl-images-amazon.com/images/I/41hiicBrfbL.jpg";
     static String thirdGroup = "https://images-na.ssl-images-amazon.com/images/I/51leB-OF7sL._AC_SY400_.jpg";
+    public String firstGroupYoutube = "https://www.youtube.com/watch?v=DelhLppPSxY&ab_channel=AvengedSevenfold";
+    public String secondGroupYoutube = "https://www.youtube.com/watch?v=HL9kaJZw8iw&ab_channel=lambofgodVEVO";
+    public String thirdGroupYoutube = "https://www.youtube.com/watch?v=B07cF9ECUv8&ab_channel=ThePit";
+    static ArrayList<String> URLCollection = new ArrayList<>();
     private Timer timer = null;
     private TimerTask task = null;
     private Context mcontext = getApplicationContext();
@@ -55,6 +62,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        collectURLInArraylist();
         btnDownload = findViewById(R.id.btnDownload);
         btnSave = findViewById(R.id.btnSave);
         btnPermissions = findViewById(R.id.btnPermissions);
@@ -80,21 +88,47 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        image.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (String.valueOf(image).equalsIgnoreCase(URLCollection.get(0))){
+                    Uri uri = Uri.parse(firstGroupYoutube);
+                    Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+                    startActivity(intent);
+                } else if (String.valueOf(image).equalsIgnoreCase(URLCollection.get(1))) {
+                    Uri uri = Uri.parse(secondGroupYoutube);
+                    Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+                    startActivity(intent);
+                } else if (String.valueOf(image).equalsIgnoreCase(URLCollection.get(2))) {
+                    Uri uri = Uri.parse(thirdGroupYoutube);
+                    Intent intent = new Intent(Intent.ACTION_VIEW,uri);
+                    startActivity(intent);
+                } else {
+                    Log.d(String.valueOf(TAG), "Parece que el evento no ha funcionado. Mira si las condiciones se están cumpliendo.");
+                    Toast.makeText(mcontext, "Ha ocurrido algún error", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
     }
 
     public static void loadImage(String url) {
-        Picasso.get().load(url);
+        Picasso.get().load(url).into(image);
     }
 
     public static void saveImage(final String url, ImageView image) {
         Picasso.get().load(url).into(new Target() {
             @Override
             public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-                File file = new File(Environment.getExternalStorageDirectory().getPath() + "/" + url);
+                String dirName = Environment.getExternalStorageDirectory().toString() + "/practicaPicasso/images";
+                File dir = new File(dirName);
                 try {
+                    if (!dir.exists())
+                        dir.mkdir();
+                    File file = new File(url);
                     file.createNewFile();
                     FileOutputStream fileOut = new FileOutputStream(file);
-                    bitmap.compress(Bitmap.CompressFormat.JPEG, 90, fileOut);
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fileOut);
                     fileOut.flush();
                     fileOut.close();
                 } catch (IOException e) {
@@ -123,31 +157,37 @@ public class MainActivity extends AppCompatActivity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
+                        //Bucle para recorrer el arraylist de URL y cargarlas con Picasso
+                        for (String s : URLCollection) {
+                            loadImage(s);
+                        }
 
-                        MainActivity.loadImage(MainActivity.firstGroup);
-                        MainActivity.saveImage(MainActivity.firstGroup,image);
-                        MainActivity.loadImage(MainActivity.secondGroup);
-                        MainActivity.saveImage(MainActivity.secondGroup,image);
-                        MainActivity.loadImage(MainActivity.thirdGroup);
-                        MainActivity.saveImage(MainActivity.thirdGroup,image);
                     }
                 });
             }
         };
         timer = new Timer();
-        timer.schedule(task, 1, 1000);
+        timer.schedule(task, 1, 2000);
     }
+
     // Método para pedir permisos al usuario
-    public void onRequestPermissions () {
-        if (ContextCompat.checkSelfPermission(mcontext,Manifest.permission.INTERNET) != PackageManager.PERMISSION_GRANTED) {
+    public void onRequestPermissions() {
+        if (ContextCompat.checkSelfPermission(mcontext, Manifest.permission.INTERNET) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.INTERNET}, MY_PERMISSION_INTERNET);
             Toast.makeText(mcontext, INTERNET_ACCEPTED, Toast.LENGTH_SHORT).show();
-        } else if (ContextCompat.checkSelfPermission(mcontext,Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+        } else if (ContextCompat.checkSelfPermission(mcontext, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, MY_PERMISSION_WRITE);
             Toast.makeText(mcontext, WRITE_ACCEPTED, Toast.LENGTH_SHORT).show();
         } else {
             Toast.makeText(mcontext, DENIED_PERMISSION, Toast.LENGTH_SHORT).show();
         }
+    }
+
+    public void collectURLInArraylist () {
+        URLCollection.add(firstGroup);
+        URLCollection.add(secondGroup);
+        URLCollection.add(thirdGroup);
+
     }
 
 }
