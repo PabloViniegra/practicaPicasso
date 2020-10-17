@@ -9,7 +9,9 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
@@ -24,6 +26,10 @@ import com.squareup.picasso.Target;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.URI;
+import java.security.Permission;
+import java.security.PermissionCollection;
+import java.security.Permissions;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -32,7 +38,12 @@ public class MainActivity extends AppCompatActivity {
     Button btnSave = null;
     Button btnPermissions = null;
     ImageView image = null;
+    final int  MY_PERMISSION_WRITE = 3;
+    final int MY_PERMISSION_INTERNET = 2;
     public final String MESSAGE_ERROR_IO = "Ha saltado una IOException";
+    public final String INTERNET_ACCEPTED = "Los permisos de Internet han sido otorgados";
+    public final String WRITE_ACCEPTED = "Los permisos de escritura han sido otorgados";
+    public final String DENIED_PERMISSION = "El permiso ha sido denegado";
     static String firstGroup = "https://lh3.googleusercontent.com/proxy/887bHSpuM52lTANHg5nYVN39BvLIOwgDQcNiA1SR8DF-NMChWA3mM8wDiUs-b411j2opT989rfX_wyC9FWEhdO6ylrD8-L2ZZHpzT_T6aa0XLN9eyvZQTtRBEA";
     static String secondGroup = "https://images-na.ssl-images-amazon.com/images/I/41hiicBrfbL.jpg";
     static String thirdGroup = "https://images-na.ssl-images-amazon.com/images/I/51leB-OF7sL._AC_SY400_.jpg";
@@ -56,6 +67,13 @@ public class MainActivity extends AppCompatActivity {
         });
 
         btnPermissions.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onRequestPermissions();
+            }
+        });
+
+        btnSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
@@ -107,14 +125,29 @@ public class MainActivity extends AppCompatActivity {
                     public void run() {
 
                         MainActivity.loadImage(MainActivity.firstGroup);
+                        MainActivity.saveImage(MainActivity.firstGroup,image);
                         MainActivity.loadImage(MainActivity.secondGroup);
+                        MainActivity.saveImage(MainActivity.secondGroup,image);
                         MainActivity.loadImage(MainActivity.thirdGroup);
+                        MainActivity.saveImage(MainActivity.thirdGroup,image);
                     }
                 });
             }
         };
         timer = new Timer();
         timer.schedule(task, 1, 1000);
+    }
+    // Método para pedir permisos al usuario
+    public void onRequestPermissions () {
+        if (ContextCompat.checkSelfPermission(mcontext,Manifest.permission.INTERNET) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.INTERNET}, MY_PERMISSION_INTERNET);
+            Toast.makeText(mcontext, INTERNET_ACCEPTED, Toast.LENGTH_SHORT).show();
+        } else if (ContextCompat.checkSelfPermission(mcontext,Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, MY_PERMISSION_WRITE);
+            Toast.makeText(mcontext, WRITE_ACCEPTED, Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(mcontext, DENIED_PERMISSION, Toast.LENGTH_SHORT).show();
+        }
     }
 
 }
