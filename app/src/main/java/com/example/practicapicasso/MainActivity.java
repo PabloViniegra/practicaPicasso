@@ -1,16 +1,10 @@
 package com.example.practicapicasso;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-
 import android.Manifest;
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -21,17 +15,18 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.URI;
-import java.security.Permission;
-import java.security.PermissionCollection;
-import java.security.Permissions;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -39,11 +34,11 @@ public class MainActivity extends AppCompatActivity {
     Button btnDownload = null;
     Button btnSave = null;
     Button btnPermissions = null;
-    static ImageView image = null;
+    ImageView image = null;
+    static String aux = "";
     final int TAG = 1;
     final int MY_PERMISSION_WRITE = 3;
     final int MY_PERMISSION_INTERNET = 2;
-    public final String MESSAGE_ERROR_IO = "Ha saltado una IOException";
     public final String INTERNET_ACCEPTED = "Los permisos de Internet han sido otorgados";
     public final String WRITE_ACCEPTED = "Los permisos de escritura han sido otorgados";
     public final String DENIED_PERMISSION = "El permiso ha sido denegado";
@@ -54,10 +49,7 @@ public class MainActivity extends AppCompatActivity {
     public String secondGroupYoutube = "https://www.youtube.com/watch?v=HL9kaJZw8iw&ab_channel=lambofgodVEVO";
     public String thirdGroupYoutube = "https://www.youtube.com/watch?v=B07cF9ECUv8&ab_channel=ThePit";
     static ArrayList<String> URLCollection = new ArrayList<>();
-    private Timer timer = null;
-    private TimerTask task = null;
     private Context mcontext = getApplicationContext();
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -70,6 +62,7 @@ public class MainActivity extends AppCompatActivity {
         btnDownload.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                chronometer();
                 chronometer();
             }
         });
@@ -84,6 +77,7 @@ public class MainActivity extends AppCompatActivity {
         btnSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                saveImage(aux);
 
             }
         });
@@ -112,27 +106,22 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public static void loadImage(String url) {
+    public void loadImage(String url) {
         Picasso.get().load(url).into(image);
     }
 
-    public static void saveImage(final String url, ImageView image) {
+    public void saveImage(final String url) {
         Picasso.get().load(url).into(new Target() {
             @Override
             public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-                String dirName = Environment.getExternalStorageDirectory().toString() + "/practicaPicasso/images";
-                File dir = new File(dirName);
-                try {
-                    if (!dir.exists())
-                        dir.mkdir();
-                    File file = new File(url);
-                    file.createNewFile();
-                    FileOutputStream fileOut = new FileOutputStream(file);
-                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fileOut);
-                    fileOut.flush();
-                    fileOut.close();
+                File directory = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).toString());
+                if (!directory.exists())
+                    directory.mkdir();
+                try (FileOutputStream fileOut = new FileOutputStream(new File(directory,new Date().toString().concat(".jpg")))) {
+                  bitmap.compress(Bitmap.CompressFormat.JPEG,90,fileOut);
+                    Toast.makeText(mcontext, "Save!", Toast.LENGTH_SHORT).show();
                 } catch (IOException e) {
-                    Log.e("IOException", e.getLocalizedMessage());
+                    e.printStackTrace();
                 }
             }
 
@@ -148,10 +137,13 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+
+
     //Contiene la tarea schedulada
     public void chronometer() {
 
-        task = new TimerTask() {
+        //Bucle para recorrer el arraylist de URL y cargarlas con Picasso
+        TimerTask task = new TimerTask() {
             @Override
             public void run() {
                 runOnUiThread(new Runnable() {
@@ -160,13 +152,13 @@ public class MainActivity extends AppCompatActivity {
                         //Bucle para recorrer el arraylist de URL y cargarlas con Picasso
                         for (String s : URLCollection) {
                             loadImage(s);
+                            aux = s;
                         }
-
                     }
                 });
             }
         };
-        timer = new Timer();
+        Timer timer = new Timer();
         timer.schedule(task, 1, 2000);
     }
 
