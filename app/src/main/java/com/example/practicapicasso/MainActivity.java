@@ -37,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
     ImageView image = null;
     static String aux = "";
     final int TAG = 1;
+    int contador = 0;
     final int MY_PERMISSION_WRITE = 3;
     final int MY_PERMISSION_INTERNET = 2;
     public final String INTERNET_ACCEPTED = "Los permisos de Internet han sido otorgados";
@@ -116,8 +117,17 @@ public class MainActivity extends AppCompatActivity {
                 File directory = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).toString());
                 if (!directory.exists())
                     directory.mkdir();
-                try (FileOutputStream fileOut = new FileOutputStream(new File(directory,new Date().toString().concat(".jpg")))) {
+                File fichero = new File(directory,new Date().toString().concat(".jpg"));
+                if (!fichero.exists()) {
+                    try {
+                        fichero.createNewFile();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                try (FileOutputStream fileOut = new FileOutputStream(fichero)) {
                   bitmap.compress(Bitmap.CompressFormat.JPEG,90,fileOut);
+                  fileOut.flush();
                     Toast.makeText(mcontext, "Save!", Toast.LENGTH_SHORT).show();
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -149,10 +159,10 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void run() {
                         //Bucle para recorrer el arraylist de URL y cargarlas con Picasso
-                        for (String s : URLCollection) {
-                            loadImage(s);
-                            aux = s;
-                        }
+                        loadImage(URLCollection.get(contador));
+                        contador++;
+                        if (contador==3)
+                            contador=0;
                     }
                 });
             }
