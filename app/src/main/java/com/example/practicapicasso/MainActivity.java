@@ -63,7 +63,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 chronometer();
-                chronometer();
             }
         });
 
@@ -85,15 +84,15 @@ public class MainActivity extends AppCompatActivity {
         image.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (String.valueOf(image).equalsIgnoreCase(URLCollection.get(0))){
+                if (aux.equalsIgnoreCase(URLCollection.get(0))){
                     Uri uri = Uri.parse(firstGroupYoutube);
                     Intent intent = new Intent(Intent.ACTION_VIEW, uri);
                     startActivity(intent);
-                } else if (String.valueOf(image).equalsIgnoreCase(URLCollection.get(1))) {
+                } else if (aux.equalsIgnoreCase(URLCollection.get(1))) {
                     Uri uri = Uri.parse(secondGroupYoutube);
                     Intent intent = new Intent(Intent.ACTION_VIEW, uri);
                     startActivity(intent);
-                } else if (String.valueOf(image).equalsIgnoreCase(URLCollection.get(2))) {
+                } else if (aux.equalsIgnoreCase(URLCollection.get(2))) {
                     Uri uri = Uri.parse(thirdGroupYoutube);
                     Intent intent = new Intent(Intent.ACTION_VIEW,uri);
                     startActivity(intent);
