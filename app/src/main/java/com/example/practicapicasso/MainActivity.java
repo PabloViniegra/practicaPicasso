@@ -35,30 +35,36 @@ public class MainActivity extends AppCompatActivity {
     Button btnSave = null;
     Button btnPermissions = null;
     ImageView image = null;
+    Button btnPass = null;
     static String aux = "";
     final int TAG = 1;
     int contador = 0;
+    Timer timer = null;
     final int MY_PERMISSION_WRITE = 3;
     final int MY_PERMISSION_INTERNET = 2;
     public final String INTERNET_ACCEPTED = "Los permisos de Internet han sido otorgados";
     public final String WRITE_ACCEPTED = "Los permisos de escritura han sido otorgados";
     public final String DENIED_PERMISSION = "El permiso ha sido denegado";
-    static String firstGroup = "https://lh3.googleusercontent.com/proxy/887bHSpuM52lTANHg5nYVN39BvLIOwgDQcNiA1SR8DF-NMChWA3mM8wDiUs-b411j2opT989rfX_wyC9FWEhdO6ylrD8-L2ZZHpzT_T6aa0XLN9eyvZQTtRBEA";
+    static String firstGroup = "https://images-na.ssl-images-amazon.com/images/I/71ckXZHkllL._AC_SX355_.jpg";
     static String secondGroup = "https://images-na.ssl-images-amazon.com/images/I/41hiicBrfbL.jpg";
     static String thirdGroup = "https://images-na.ssl-images-amazon.com/images/I/51leB-OF7sL._AC_SY400_.jpg";
     public String firstGroupYoutube = "https://www.youtube.com/watch?v=DelhLppPSxY&ab_channel=AvengedSevenfold";
     public String secondGroupYoutube = "https://www.youtube.com/watch?v=HL9kaJZw8iw&ab_channel=lambofgodVEVO";
     public String thirdGroupYoutube = "https://www.youtube.com/watch?v=B07cF9ECUv8&ab_channel=ThePit";
     static ArrayList<String> URLCollection = new ArrayList<>();
-    private Context mcontext = getApplicationContext();
+    private Context mcontext = null;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         collectURLInArraylist();
+        mcontext = getApplicationContext();
         btnDownload = findViewById(R.id.btnDownload);
         btnSave = findViewById(R.id.btnSave);
         btnPermissions = findViewById(R.id.btnPermissions);
+        btnPass = findViewById(R.id.btnPass);
+        image = findViewById(R.id.RockImages);
+
 
         btnDownload.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -104,6 +110,28 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        btnPass.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent sendIntent = new Intent(MainActivity.this, SecondActivity.class);
+                sendIntent.putStringArrayListExtra("IMAGELIST",URLCollection);
+                startActivity(sendIntent);
+            }
+        });
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        timer.cancel();
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (timer!= null)
+            chronometer();
     }
 
     public void loadImage(String url) {
@@ -114,7 +142,7 @@ public class MainActivity extends AppCompatActivity {
         Picasso.get().load(url).into(new Target() {
             @Override
             public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-                File directory = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).toString());
+                File directory = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).toString());
                 if (!directory.exists())
                     directory.mkdir();
                 File fichero = new File(directory,new Date().toString().concat(".jpg"));
@@ -160,6 +188,7 @@ public class MainActivity extends AppCompatActivity {
                     public void run() {
                         //Bucle para recorrer el arraylist de URL y cargarlas con Picasso
                         loadImage(URLCollection.get(contador));
+                        aux = URLCollection.get(contador);
                         contador++;
                         if (contador==3)
                             contador=0;
@@ -167,7 +196,7 @@ public class MainActivity extends AppCompatActivity {
                 });
             }
         };
-        Timer timer = new Timer();
+        timer = new Timer();
         timer.schedule(task, 1, 2000);
     }
 
